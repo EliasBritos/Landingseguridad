@@ -28,12 +28,12 @@
         t.src=v;s=b.getElementsByTagName(e)[0];
         s.parentNode.insertBefore(t,s)}(window, document,'script',
         'https://connect.facebook.net/en_US/fbevents.js');
-        fbq('init', '1794693698634795');
+        fbq('init', '1757022965440437');
         var pvEventId = 'pv_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
         fbq('track', 'PageView', {}, { eventID: pvEventId });
     </script>
     <noscript><img height="1" width="1" style="display:none"
-    src="https://www.facebook.com/tr?id=1794693698634795&ev=PageView&noscript=1"
+    src="https://www.facebook.com/tr?id=1757022965440437&ev=PageView&noscript=1"
     /></noscript>
     <!-- End Meta Pixel Code -->
 
@@ -115,9 +115,9 @@
                 const nuevaVentana = window.open('about:blank', '_blank');
                 const mensaje = encodeURIComponent("Hola, quiero recibir más información");
 
-                // Evento Meta Pixel
+                // Evento Meta Pixel (navegador) + Conversions API (servidor) con el mismo eventId para deduplicar
+                const eventId = generateEventId();
                 if (typeof fbq !== 'undefined') {
-                    const eventId = generateEventId();
                     fbq('track', 'Contact', {
                         content_name: 'Contact',
                         content_category: 'Lead',
@@ -126,6 +126,11 @@
                     }, { eventID: eventId });
                     console.log('✅ CompleteRegistration tracked, eventID:', eventId);
                 }
+                fetch('/api/track-contact', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ eventId, eventSourceUrl: window.location.href })
+                }).catch(err => console.warn('⚠️ CAPI Contact falló:', err));
 
                 obtenerYRotarNumero().then(numero => {
                     const url = `https://wa.me/${numero}?text=${mensaje}`;
